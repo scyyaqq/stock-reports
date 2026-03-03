@@ -1,460 +1,118 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>A股港股美股投资日报</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            background: #0a0a0f;
-            color: #fff;
-            line-height: 1.6;
-            padding-bottom: 30px;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
-            padding: 24px 16px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .header h1 {
-            font-size: 1.4em;
-            font-weight: 700;
-            margin-bottom: 6px;
-            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .header .date { font-size: 0.85em; color: #666; }
-        
-        .market-overview {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            padding: 16px;
-            background: rgba(255,255,255,0.02);
-        }
-        .market-card {
-            background: rgba(255,255,255,0.03);
-            border-radius: 12px;
-            padding: 12px 8px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .market-card .name { font-size: 0.75em; color: #888; margin-bottom: 4px; }
-        .market-card .value { font-size: 1.1em; font-weight: 700; }
-        .market-card .change { font-size: 0.75em; margin-top: 2px; }
-        .up { color: #27ae60; }
-        .down { color: #e74c3c; }
-        
-        .section {
-            padding: 20px 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .section-title {
-            font-size: 1.1em;
-            font-weight: 600;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .section-title.news { color: #f39c12; }
-        .section-title.rec { color: #27ae60; }
-        .section-title.us { color: #3498db; }
-        
-        .news-item {
-            background: rgba(255,255,255,0.03);
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 10px;
-            border-left: 3px solid #3498db;
-        }
-        .news-item.hot { border-left-color: #e74c3c; }
-        .news-item h4 { font-size: 0.95em; margin-bottom: 6px; }
-        .news-item p { font-size: 0.85em; color: #999; line-height: 1.5; }
-        .tag {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 0.7em;
-            margin-top: 8px;
-            margin-right: 6px;
-        }
-        .tag-red { background: rgba(231, 76, 60, 0.15); color: #e74c3c; }
-        .tag-blue { background: rgba(52, 152, 219, 0.15); color: #3498db; }
-        .tag-green { background: rgba(39, 174, 96, 0.15); color: #27ae60; }
-        
-        .rec-card {
-            background: rgba(255,255,255,0.03);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 12px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .rec-card h3 {
-            font-size: 1em;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .rec-card.buy h3 { color: #27ae60; }
-        .rec-card.watch h3 { color: #f39c12; }
-        .rec-card.avoid h3 { color: #e74c3c; }
-        
-        .stock-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .stock-item:last-child { border-bottom: none; }
-        .stock-info { flex: 1; }
-        .stock-name { font-weight: 600; font-size: 0.95em; }
-        .stock-code { font-size: 0.75em; color: #666; }
-        .stock-reason { font-size: 0.8em; color: #888; margin-top: 4px; }
-        .stock-breadth {
-            text-align: right;
-            min-width: 70px;
-        }
-        .breadth-val {
-            font-size: 0.85em;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 12px;
-        }
-        .breadth-high { background: rgba(39, 174, 96, 0.15); color: #27ae60; }
-        .breadth-mid { background: rgba(243, 156, 18, 0.15); color: #f39c12; }
-        .breadth-low { background: rgba(231, 76, 60, 0.15); color: #e74c3c; }
-        
-        .sector-grid {
-            display: grid;
-            gap: 10px;
-        }
-        .sector-item {
-            background: rgba(255,255,255,0.03);
-            border-radius: 12px;
-            padding: 14px;
-            display: grid;
-            grid-template-columns: 1fr auto auto;
-            align-items: center;
-            gap: 12px;
-        }
-        .sector-name { font-weight: 600; font-size: 0.9em; }
-        .sector-status {
-            font-size: 0.75em;
-            padding: 4px 10px;
-            border-radius: 12px;
-            white-space: nowrap;
-        }
-        .status-strong { background: rgba(39, 174, 96, 0.15); color: #27ae60; }
-        .status-reversal { background: rgba(243, 156, 18, 0.15); color: #f39c12; }
-        .status-weak { background: rgba(231, 76, 60, 0.15); color: #e74c3c; }
-        
-        .risk-box {
-            background: rgba(231, 76, 60, 0.05);
-            border-radius: 12px;
-            padding: 16px;
-            border: 1px solid rgba(231, 76, 60, 0.2);
-        }
-        .risk-box h3 { color: #e74c3c; font-size: 1em; margin-bottom: 10px; }
-        .risk-item {
-            padding: 8px 0;
-            font-size: 0.85em;
-            color: #aaa;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .risk-item:last-child { border-bottom: none; }
-        
-        .footer {
-            text-align: center;
-            padding: 30px 16px;
-            color: #444;
-            font-size: 0.8em;
-        }
-        
-        @media (max-width: 380px) {
-            .market-overview { grid-template-columns: 1fr; }
-            .sector-item { grid-template-columns: 1fr; gap: 8px; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>投资日报 2026.03.03</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;margin:0;padding:16px;background:#f5f5f5;line-height:1.6}
+.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+h1{font-size:20px;margin:0 0 8px;color:#333}
+.date{color:#999;font-size:14px}
+h2{font-size:16px;margin:16px 0 12px;padding-bottom:8px;border-bottom:2px solid #2196f3;color:#333}
+.item{padding:10px 0;border-bottom:1px solid #eee}
+.item:last-child{border-bottom:none}
+.label{font-size:14px;color:#666}
+.value{font-size:18px;font-weight:600;margin-top:4px}
+.up{color:#4caf50}
+.down{color:#f44336}
+.tag{display:inline-block;padding:4px 10px;border-radius:4px;font-size:12px;margin-right:6px;margin-top:6px}
+.tag-green{background:#e8f5e9;color:#2e7d32}
+.tag-red{background:#ffebee;color:#c62828}
+.tag-blue{background:#e3f2fd;color:#1565c0}
+.news{margin:12px 0;padding:12px;background:#f8f9fa;border-radius:8px;border-left:3px solid #ff9800}
+.footer{text-align:center;color:#999;font-size:12px;margin-top:20px}
+</style>
 </head>
 <body>
-    <div class="header">
-        <h1>📊 A股港股美股投资日报</h1>
-        <div class="date">2026年3月3日</div>
-    </div>
-    
-    <div class="market-overview">
-        <div class="market-card">
-            <div class="name">上证指数</div>
-            <div class="value down">4122.68</div>
-            <div class="change down">-1.43%</div>
-        </div>
-        <div class="market-card">
-            <div class="name">恒生指数</div>
-            <div class="value down">25768.08</div>
-            <div class="change down">-1.12%</div>
-        </div>
-        <div class="market-card">
-            <div class="name">道琼斯</div>
-            <div class="value down">48904.78</div>
-            <div class="change down">-0.15%</div>
-        </div>
-        <div class="market-card">
-            <div class="name">纳斯达克</div>
-            <div class="value up">22748.86</div>
-            <div class="change up">+0.36%</div>
-        </div>
-        <div class="market-card">
-            <div class="name">标普500</div>
-            <div class="value up">6881.62</div>
-            <div class="change up">+0.04%</div>
-        </div>
-        <div class="market-card">
-            <div class="name">油气板块</div>
-            <div class="value up">+7.31%</div>
-            <div class="change up">A股领涨</div>
-        </div>
-    </div>
-    
-    <div class="section">
-        <div class="section-title news">📰 24小时重要新闻</div>
-        
-        <div class="news-item hot">
-            <h4>🔥 伊朗关闭霍尔木兹海峡</h4>
-            <p>伊朗宣布关闭霍尔木兹海峡，打击所有试图通过的船只。该海峡承载全球20%石油贸易。欧洲天然气一度飙升50%，油轮运费创历史纪录。</p>
-            <span class="tag tag-red">地缘冲突</span>
-            <span class="tag tag-green">能源</span>
-        </div>
-        
-        <div class="news-item">
-            <h4>📈 A股石油石化涨停潮</h4>
-            <p>中石油、中海油连续两日涨停。主力资金净流入石油石化板块逾196亿元，航运板块获71亿元净流入。</p>
-            <span class="tag tag-red">涨停潮</span>
-            <span class="tag tag-green">资金流向</span>
-        </div>
-        
-        <div class="news-item">
-            <h4>🚢 油轮运价创历史新高</h4>
-            <p>VLCC一年期租金突破10万美元/天，TD3C即期运价接近20万美元/天。集运欧线连续两日涨停。</p>
-            <span class="tag tag-blue">航运</span>
-        </div>
-        
-        <div class="news-item">
-            <h4>💻 美股科技股分化</h4>
-            <p>英伟达涨2.9%领跑科技股，微软涨超1%，苹果涨0.2%。但盘前科技股普遍下跌，市场对AI估值存忧。</p>
-            <span class="tag tag-blue">美股</span>
-            <span class="tag tag-green">科技</span>
-        </div>
-        
-        <div class="news-item">
-            <h4>🏦 银行股逆势走强</h4>
-            <p>A股银行板块逆势上涨，建行、农行涨超2%。港股内银股普遍上扬，重庆农商行涨超3%。</p>
-            <span class="tag tag-green">银行</span>
-        </div>
-    </div>
-    
-    <div class="section">
-        <div class="section-title us">🇺🇸 美股盘后分析</div>
-        
-        <div class="rec-card">
-            <div class="stock-item">
-                <div class="stock-info">
-                    <div class="stock-name">道指 / 标普500 / 纳指</div>
-                    <div class="stock-reason">道指跌0.15%，标普涨0.04%，纳指涨0.36%</div>
-                </div>
-                <div class="stock-breadth">
-                    <span class="breadth-val breadth-mid">V型反弹</span>
-                </div>
-            </div>
-            
-            <div class="stock-item">
-                <div class="stock-info">
-                    <div class="stock-name">英伟达 NVDA</div>
-                    <div class="stock-reason">涨2.9%，带领科技股反弹，资金充裕抗冲击能力强</div>
-                </div>
-                <div class="stock-breadth">
-                    <span class="breadth-val breadth-high">领涨</span>
-                </div>
-            </div>
-            
-            <div class="stock-item">
-                <div class="stock-info">
-                    <div class="stock-name">埃克森美孚 XOM</div>
-                    <div class="stock-reason">受益油价大涨超6%，能源股集体上涨</div>
-                </div>
-                <div class="stock-breadth">
-                    <span class="breadth-val breadth-high">强势</span>
-                </div>
-            </div>
-            
-            <div class="stock-item">
-                <div class="stock-info">
-                    <div class="stock-name">诺斯罗普·格鲁曼 NOC</div>
-                    <div class="stock-reason">国防股涨约4%，地缘政治推动军工板块</div>
-                </div>
-                <div class="stock-breadth">
-                    <span class="breadth-val breadth-mid">关注</span>
-                </div>
-            </div>
-        </div>
-        
-        <p style="color:#888;font-size:0.85em;padding:0 4px;">💡 美股早盘一度大跌，道指盘中跌近600点，但随后V型反弹。市场在地缘冲突后展现出韧性，历史数据显示冲突后两周内通常会转涨。</p>
-    </div>
-    
-    <div class="section">
-        <div class="section-title rec">🎯 今日关注标的</div>
-        
-        <div class="rec-card buy">
-            <h3>🚀 重点方向</h3>
-            
-            <div class="stock-item">
-                <div class="stock-info">
-                    <div class="stock-name">中国石油 / 中国海油</div>
-                    <div class="stock-code">601857.SH / 600938.SH</div>
-                    <div class="stock-reason">连续涨停，中东局势持续催化，主力资金大幅流入</div>
-                </div>
-                <div class="stock-breadth">
-                    <span class="breadth-val breadth-high">90%</span>
-                </div>
-            </div>
-            
-            <div class="stock-item">
-                <div class="stock-info">
-                    <div class="stock-name">中远海能 / 中远海控</div>
-                    <div class="stock-code">600026.SH / 601919.SH</div>
-                    <div class="stock-reason">油运运价创历史新高，VLCC租金突破10万美元/天</div>
-                </div>
-                <div class="stock-breadth">
-                    <span class="breadth-val breadth-high">强势</span>
-                </div>
-            </div>
-            
-            <div class="stock-item">
-                <div class="stock-info">
-                    <div class="stock-name">建设银行 / 农业银行</div>
-                    <div class="stock-code">601939.SH / 601288.SH</div>
-                    <div class="stock-reason">高股息防御属性，板块逆势走强，估值修复中</div>
-                </div>
-                <div class="stock-breadth">
-                    <span class="breadth-val breadth-mid">52.8%</span>
-                </div>
-            </div>
-            
-            <div class="stock-item">
-                <div class="stock-info">
-                    <div class="stock-name">中国神华 / 长江电力</div>
-                    <div class="stock-code">601088.SH / 600900.SH</div>
-                    <div class="stock-reason">高股息防御配置，煤炭板块强势，电力分红稳定</div>
-                </div>
-                <div class="stock-breadth">
-                    <span class="breadth-val breadth-high">90%</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="rec-card avoid">
-            <h3>⚠️ 短期回避</h3>
-            
-            <div class="stock-item">
-                <div class="stock-info">
-                    <div class="stock-name">半导体/芯片板块</div>
-                    <div class="stock-reason">主力资金净流出超382亿元，板块大幅下挫</div>
-                </div>
-                <div class="stock-breadth">
-                    <span class="breadth-val breadth-low">回避</span>
-                </div>
-            </div>
-            
-            <div class="stock-item">
-                <div class="stock-info">
-                    <div class="stock-name">有色金属板块</div>
-                    <div class="stock-reason">紫金矿业跌超6%，赣锋锂业跌超10%，避险情绪冲击</div>
-                </div>
-                <div class="stock-breadth">
-                    <span class="breadth-val breadth-low">回避</span>
-                </div>
-            </div>
-            
-            <div class="stock-item">
-                <div class="stock-info">
-                    <div class="stock-name">科技股(美股)</div>
-                    <div class="stock-reason">盘前普跌，估值承压，市场担忧AI泡沫</div>
-                </div>
-                <div class="stock-breadth">
-                    <span class="breadth-val breadth-low">谨慎</span>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="section">
-        <div class="section-title">📊 A股板块概况</div>
-        
-        <div class="sector-grid">
-            <div class="sector-item">
-                <div class="sector-name">石油石化</div>
-                <div class="sector-status status-strong">强势</div>
-                <span class="breadth-val breadth-high">90%</span>
-            </div>
-            
-            <div class="sector-item">
-                <div class="sector-name">煤炭</div>
-                <div class="sector-status status-strong">强势</div>
-                <span class="breadth-val breadth-high">90%</span>
-            </div>
-            
-            <div class="sector-item">
-                <div class="sector-name">公用事业</div>
-                <div class="sector-status status-strong">强势</div>
-                <span class="breadth-val breadth-high">75.8%</span>
-            </div>
-            
-            <div class="sector-item">
-                <div class="sector-name">钢铁</div>
-                <div class="sector-status status-strong">强势</div>
-                <span class="breadth-val breadth-high">72.7%</span>
-            </div>
-            
-            <div class="sector-item">
-                <div class="sector-name">银行</div>
-                <div class="sector-status status-reversal">转强</div>
-                <span class="breadth-val breadth-mid">52.8%</span>
-            </div>
-            
-            <div class="sector-item">
-                <div class="sector-name">医药生物</div>
-                <div class="sector-status status-weak">弱势</div>
-                <span class="breadth-val breadth-low">26.2%</span>
-            </div>
-            
-            <div class="sector-item">
-                <div class="sector-name">商贸零售</div>
-                <div class="sector-status status-weak">弱势</div>
-                <span class="breadth-val breadth-low">15.1%</span>
-            </div>
-        </div>
-    </div>
-    
-    <div class="section">
-        <div class="risk-box">
-            <h3>⚠️ 风险提示</h3>
-            <div class="risk-item">1. 地缘风险：若中东冲突缓和，能源板块可能快速回调</div>
-            <div class="risk-item">2. 美联储政策：通胀担忧可能推迟降息预期</div>
-            <div class="risk-item">3. 科技股估值：AI相关股票估值仍处于高位</div>
-            <div class="risk-item">4. 追高风险：油气板块短期涨幅过大，注意仓位控制</div>
-        </div>
-    </div>
-    
-    <div class="footer">
-        <p>⚠️ 仅供参考，不构成投资建议。投资有风险，入市需谨慎。</p>
-        <p>报告有效期：3天</p>
-    </div>
+<div class="card">
+<h1>📊 投资日报</h1>
+<div class="date">2026年3月3日</div>
+</div>
+
+<div class="card">
+<h2>📈 市场概况</h2>
+<div class="item">
+<div class="label">上证指数</div>
+<div class="value down">4122.68 <span style="font-size:14px">-1.43%</span></div>
+</div>
+<div class="item">
+<div class="label">恒生指数</div>
+<div class="value down">25768.08 <span style="font-size:14px">-1.12%</span></div>
+</div>
+<div class="item">
+<div class="label">道琼斯</div>
+<div class="value down">48904.78 <span style="font-size:14px">-0.15%</span></div>
+</div>
+<div class="item">
+<div class="label">纳斯达克</div>
+<div class="value up">22748.86 <span style="font-size:14px">+0.36%</span></div>
+</div>
+</div>
+
+<div class="card">
+<h2>🚀 重点方向</h2>
+<div class="item">
+<div class="label"><strong>石油石化</strong> 宽度90%</div>
+<div style="font-size:13px;color:#666;margin-top:4px">中石油/中海油连续涨停，资金+196亿</div>
+<span class="tag tag-green">强势</span>
+</div>
+<div class="item">
+<div class="label"><strong>煤炭</strong> 宽度90%</div>
+<div style="font-size:13px;color:#666;margin-top:4px">中国神华等高股息防御</div>
+<span class="tag tag-green">强势</span>
+</div>
+<div class="item">
+<div class="label"><strong>银行</strong> 宽度52.8%</div>
+<div style="font-size:13px;color:#666;margin-top:4px">建行/农行逆势上涨，由弱转强</div>
+<span class="tag tag-blue">反转</span>
+</div>
+<div class="item">
+<div class="label"><strong>航运</strong></div>
+<div style="font-size:13px;color:#666;margin-top:4px">中远海能/海控，VLCC租金破10万/天</div>
+<span class="tag tag-green">事件驱动</span>
+</div>
+</div>
+
+<div class="card">
+<h2>⚠️ 回避板块</h2>
+<div class="item">
+<div class="label">半导体</div>
+<div style="font-size:13px;color:#666">主力净流出-382亿</div>
+<span class="tag tag-red">回避</span>
+</div>
+<div class="item">
+<div class="label">有色金属</div>
+<div style="font-size:13px;color:#666">紫金矿业跌超6%</div>
+<span class="tag tag-red">回避</span>
+</div>
+</div>
+
+<div class="card">
+<h2>📰 重要新闻</h2>
+<div class="news">
+<strong>🔥 伊朗关闭霍尔木兹海峡</strong><br><span style="font-size:13px">引爆全球能源板块，欧洲天然气飙升50%</span>
+</div>
+<div class="news">
+<strong>📈 A股石油石化涨停潮</strong><br><span style="font-size:13px">中石油/中海油连续两日涨停</span>
+</div>
+<div class="news">
+<strong>💻 美股V型反弹</strong><br><span style="font-size:13px">英伟达涨2.9%，道指盘中跌600点后回升</span>
+</div>
+</div>
+
+<div class="card">
+<h2>🔮 明日展望</h2>
+<p style="font-size:14px;color:#555;margin:0">
+<strong>进攻：</strong>能源、航运、周期<br>
+<strong>防御：</strong>银行、公用事业、高股息<br>
+<strong>回避：</strong>半导体、有色、高估值科技<br>
+<strong>观察：</strong>海峡局势、美联储表态、两会政策
+</p>
+</div>
+
+<div class="footer">
+仅供参考，不构成投资建议<br>报告时间：2026-03-03
+</div>
 </body>
 </html>
